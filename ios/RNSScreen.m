@@ -30,6 +30,7 @@
     _gestureEnabled = YES;
     _replaceAnimation = RNSScreenReplaceAnimationPop;
     _dismissed = NO;
+    _preventGoingBack = NO;
   }
 
   return self;
@@ -162,6 +163,11 @@
   _gestureEnabled = gestureEnabled;
 }
 
+- (void)setPreventGoingBack:(BOOL)preventGoingBack
+{
+  _preventGoingBack = preventGoingBack;
+}
+
 - (void)setReplaceAnimation:(RNSScreenReplaceAnimation)replaceAnimation
 {
   _replaceAnimation = replaceAnimation;
@@ -289,7 +295,13 @@
 
 - (BOOL)presentationControllerShouldDismiss:(UIPresentationController *)presentationController
 {
-  return _gestureEnabled;
+  if (_preventGoingBack) {
+    if (self.onGoingBackPrevented) {
+      self.onGoingBackPrevented(nil);
+    }
+    return NO;
+  }
+  return YES;
 }
 
 - (void)presentationControllerDidDismiss:(UIPresentationController *)presentationController
@@ -522,11 +534,14 @@ RCT_EXPORT_VIEW_PROPERTY(gestureEnabled, BOOL)
 RCT_EXPORT_VIEW_PROPERTY(replaceAnimation, RNSScreenReplaceAnimation)
 RCT_EXPORT_VIEW_PROPERTY(stackPresentation, RNSScreenStackPresentation)
 RCT_EXPORT_VIEW_PROPERTY(stackAnimation, RNSScreenStackAnimation)
+RCT_EXPORT_VIEW_PROPERTY(preventGoingBack, BOOL)
+
 RCT_EXPORT_VIEW_PROPERTY(onWillAppear, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onWillDisappear, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onAppear, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onDisappear, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onDismissed, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onGoingBackPrevented, RCTDirectEventBlock);
 
 - (UIView *)view
 {
